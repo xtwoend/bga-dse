@@ -51,7 +51,7 @@ class MqttReceiverProcess extends AbstractProcess
                 ]);
                 
                 // Wait before retrying
-                sleep(5);
+                sleep(15);
                 $this->logger->info('Restarting MQTT receiver process');
             }
         }

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Mqtt\Handler\pnbm;
+namespace App\Mqtt\Handler\PNBM;
 
 use Hyperf\Stringable\Str;
 use Hyperf\DbConnection\Db;

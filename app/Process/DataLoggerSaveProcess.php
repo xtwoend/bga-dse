@@ -15,9 +15,9 @@ class DataLoggerSaveProcess extends AbstractProcess
     public function handle(): void
     {
         $groups = [
-            'dse_bbnm_genset1', 'dse_bbnm_genset2', 'dse_bbnm_pln', 'dse_bbnm_rurbine1', 'dse_bbnm_rurbine2',
-            'dse_btjm_genset1', 'dse_btjm_genset2', 'dse_btjm_pln', 'dse_btjm_rurbine1', 'dse_btjm_rurbine2',
-            'dse_pnbm_genset1', 'dse_pnbm_genset2', 'dse_pnbm_pln', 'dse_pnbm_rurbine1', 'dse_pnbm_rurbine2',
+            'dse_bbnm_genset1', 'dse_bbnm_genset2', 'dse_bbnm_pln', 'dse_bbnm_turbine1', 'dse_bbnm_turbine2',
+            'dse_btjm_genset1', 'dse_btjm_genset2', 'dse_btjm_pln', 'dse_btjm_turbine1', 'dse_btjm_turbine2',
+            'dse_pnbm_genset1', 'dse_pnbm_genset2', 'dse_pnbm_pln', 'dse_pnbm_turbine1', 'dse_pnbm_turbine2',
         ];
 
         while (true) {

@@ -26,7 +26,7 @@ class Turbine1TopicHandler implements MqttHandlerInterface
         // var_dump("Received message on topic '{$topic}': {$message}");
         
         [$tag, $value] = $this->topicToTag($topic, $message);
-        $table_name = 'dse_btjm_rurbine1';
+        $table_name = 'dse_btjm_turbine1';
 
         LogDataBuffer::updateOrCreate(
             [

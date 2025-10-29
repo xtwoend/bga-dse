@@ -37,6 +37,8 @@ class MqttService
             throw new \InvalidArgumentException("MQTT connection '{$connection}' not found in configuration");
         }
 
+        $config['client_id'] = $config['client_id'] . uniqid();
+
         return new MqttClient($config['host'], $config['port'], $config['client_id']);
     }
 

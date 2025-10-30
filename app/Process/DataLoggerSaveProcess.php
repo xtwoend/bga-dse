@@ -24,7 +24,7 @@ class DataLoggerSaveProcess extends AbstractProcess
             foreach($groups as $tableName) {
                 $data = Db::table('log_data_buffer')->where('group', $tableName)->get()->pluck('value', 'tag')->toArray();
                 $this->handleLogData($tableName, $data);
-                sleep(1);
+                sleep(2);
             }
         }
     }

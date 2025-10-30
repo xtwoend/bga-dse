@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('tag', 255);
             $table->float('value');
             $table->datetimes();
+            $table->unique(['group', 'tag'], 'unique_log_entry');
         });
     }
 

@@ -146,8 +146,8 @@ class DynamicTableCreator
         }
         
         if (is_int($value)) {
-            // Check if it's a big integer
-            if ($value > 2147483647 || $value < -2147483648) {
+            // Use bigInteger for safety with large numbers
+            if (abs($value) > 100000) { // Use bigInteger for values that might grow
                 return 'bigInteger';
             }
             return 'integer';
@@ -160,6 +160,10 @@ class DynamicTableCreator
         if (is_numeric($value)) {
             $numValue = (float) $value;
             if (floor($numValue) == $numValue) {
+                // Use bigInteger for large whole numbers
+                if (abs($numValue) > 100000) {
+                    return 'bigInteger';
+                }
                 return 'integer';
             }
             return 'float';

@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace App\Mqtt\Handler\PNBM;
 
 use Hyperf\Stringable\Str;
-use Hyperf\DbConnection\Db;
-use App\Model\LogDataBuffer;
+use Hyperf\Redis\Redis;
 use Psr\Log\LoggerInterface;
 use Hyperf\Logger\LoggerFactory;
 use App\Mqtt\Contract\MqttHandlerInterface;
@@ -14,10 +13,12 @@ use App\Mqtt\Contract\MqttHandlerInterface;
 class Turbine2TopicHandler implements MqttHandlerInterface
 {
     private LoggerInterface $logger;
+    private Redis $redis;
 
-    public function __construct(LoggerFactory $loggerFactory)
+    public function __construct(LoggerFactory $loggerFactory, Redis $redis)
     {
         $this->logger = $loggerFactory->get('mqtt');
+        $this->redis = $redis;
     }
 
     public function handle(string $topic, string $message): void
@@ -28,15 +29,17 @@ class Turbine2TopicHandler implements MqttHandlerInterface
         [$tag, $value] = $this->topicToTag($topic, $message);
         $table_name = 'dse_pnbm_turbine2';
 
-        LogDataBuffer::updateOrCreate(
-            [
-                'group' => $table_name,
-                'tag' => $tag,
-            ],
-            [
-                'value' => $value,
-            ]
-        );
+        // Store data in Redis with key format: log_data_buffer:{group}:{tag}
+        $redis_key = "log_data_buffer:{$table_name}:{$tag}";
+        $data = [
+            'group' => $table_name,
+            'tag' => $tag,
+            'value' => $value,
+            'updated_at' => date('Y-m-d H:i:s')
+        ];
+        
+        // Store as JSON in Redis with TTL (optional - set to 24 hours)
+        $this->redis->setex($redis_key, 86400, json_encode($data));
     }
 
     // Extract value from JSON message

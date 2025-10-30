@@ -59,6 +59,7 @@ class MqttService
 
             // Subscribe to configured topics
             foreach ($config['topics'] as $topic => $topicConfig) {
+                
                 $client->subscribe($topic, function (string $topic, string $message) use ($topicConfig) {
                     $this->handleMessage($topic, $message, $topicConfig);
                 }, $topicConfig['qos'] ?? 0);
@@ -106,6 +107,7 @@ class MqttService
             if (isset($topicConfig['handler'])) {
                 $handler = $this->container->get($topicConfig['handler']);
                 $handler->handle($topic, $message);
+                // var_dump($topic, $message);
             } else {
                 $this->logger->warning('No handler configured for topic', ['topic' => $topic]);
             }

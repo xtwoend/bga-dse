@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements('id');
             $table->string('group', 255);
             $table->string('tag', 255);
-            $table->float('value');
+            $table->string('value', 255);
             $table->datetimes();
             $table->unique(['group', 'tag'], 'unique_log_entry');
         });

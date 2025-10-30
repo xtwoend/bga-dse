@@ -18,6 +18,10 @@ class DynamicTableCreator
     {
         // Check if table already exists
         if (Schema::hasTable($tableName)) {
+            // If auto_add_columns option is enabled, add missing columns
+            if ($options['auto_add_columns'] ?? false) {
+                self::addMissingColumns($tableName, $data, $options);
+            }
             return false;
         }
 
@@ -189,6 +193,11 @@ class DynamicTableCreator
      */
     private static function isDateString(string $value): bool
     {
+        // Empty strings are not dates
+        if (trim($value) === '') {
+            return false;
+        }
+        
         try {
             $date = Carbon::parse($value);
             return $date instanceof Carbon;
@@ -203,30 +212,48 @@ class DynamicTableCreator
     public static function insertDataIntoTable(string $tableName, array $data, array $options = []): void
     {
         $includeTimestamps = $options['timestamps'] ?? true;
+        $autoAddColumns = $options['auto_add_columns'] ?? false;
+        
+        // If auto_add_columns is enabled, ensure all columns exist
+        if ($autoAddColumns && Schema::hasTable($tableName)) {
+            self::addMissingColumns($tableName, $data, $options);
+        }
+        
+        // Get existing columns to filter data
+        $existingColumns = self::getExistingColumnNames($tableName);
         
         // Prepare data for insertion
         $insertData = [];
         foreach ($data as $key => $value) {
             $columnName = self::sanitizeColumnName($key);
             
-            // Handle different data types for insertion
-            if (is_array($value) || is_object($value)) {
-                $insertData[$columnName] = json_encode($value);
-            } elseif (is_bool($value)) {
-                $insertData[$columnName] = $value ? 1 : 0;
-            } else {
-                $insertData[$columnName] = $value;
+            // Only include columns that exist in the table
+            if (in_array($columnName, $existingColumns)) {
+                // Handle different data types for insertion
+                if (is_array($value) || is_object($value)) {
+                    $insertData[$columnName] = json_encode($value);
+                } elseif (is_bool($value)) {
+                    $insertData[$columnName] = $value ? 1 : 0;
+                } else {
+                    $insertData[$columnName] = $value;
+                }
             }
         }
         
-        // Add timestamps if requested
+        // Add timestamps if requested and columns exist
         if ($includeTimestamps) {
-            $insertData['created_at'] = Carbon::now();
-            $insertData['updated_at'] = Carbon::now();
+            if (in_array('created_at', $existingColumns)) {
+                $insertData['created_at'] = Carbon::now();
+            }
+            if (in_array('updated_at', $existingColumns)) {
+                $insertData['updated_at'] = Carbon::now();
+            }
         }
         
         // Insert data
-        Db::table($tableName)->insert($insertData);
+        if (!empty($insertData)) {
+            Db::table($tableName)->insert($insertData);
+        }
     }
 
     /**
@@ -234,6 +261,13 @@ class DynamicTableCreator
      */
     public static function createTableAndInsertData(string $tableName, array $data, array $options = []): bool
     {
+        // If auto_add_columns is enabled, use ensureTableWithColumns
+        if ($options['auto_add_columns'] ?? false) {
+            $tableCreated = self::ensureTableWithColumns($tableName, $data, $options);
+            self::insertDataIntoTable($tableName, $data, $options);
+            return $tableCreated;
+        }
+        
         $tableCreated = self::createTableFromArrayData($tableName, $data, $options);
         self::insertDataIntoTable($tableName, $data, $options);
         
@@ -285,5 +319,109 @@ class DynamicTableCreator
         }
         
         return false;
+    }
+
+    /**
+     * Add missing columns to existing table
+     */
+    public static function addMissingColumns(string $tableName, array $data, array $options = []): bool
+    {
+        if (!Schema::hasTable($tableName)) {
+            return false;
+        }
+
+        $existingColumns = self::getExistingColumnNames($tableName);
+        $missingColumns = [];
+
+        // Check which columns are missing
+        foreach ($data as $key => $value) {
+            $columnName = self::sanitizeColumnName($key);
+            if (!in_array($columnName, $existingColumns)) {
+                $missingColumns[$columnName] = $value;
+            }
+        }
+
+        // Add missing columns
+        if (!empty($missingColumns)) {
+            Schema::table($tableName, function (Blueprint $table) use ($missingColumns) {
+                foreach ($missingColumns as $columnName => $value) {
+                    $columnType = self::determineColumnType($value);
+                    self::addColumnToTable($table, $columnName, $columnType, $value);
+                }
+            });
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get existing column names from a table
+     */
+    public static function getExistingColumnNames(string $tableName): array
+    {
+        if (!Schema::hasTable($tableName)) {
+            return [];
+        }
+
+        $columns = Schema::getColumnListing($tableName);
+        return $columns;
+    }
+
+    /**
+     * Check if column exists in table
+     */
+    public static function hasColumn(string $tableName, string $columnName): bool
+    {
+        return Schema::hasColumn($tableName, $columnName);
+    }
+
+    /**
+     * Add single column to existing table
+     */
+    public static function addColumnToExistingTable(string $tableName, string $columnName, $sampleValue = null, array $options = []): bool
+    {
+        if (!Schema::hasTable($tableName)) {
+            return false;
+        }
+
+        if (Schema::hasColumn($tableName, $columnName)) {
+            return false; // Column already exists
+        }
+
+        $columnType = isset($options['type']) ? $options['type'] : self::determineColumnType($sampleValue);
+        
+        Schema::table($tableName, function (Blueprint $table) use ($columnName, $columnType, $sampleValue) {
+            self::addColumnToTable($table, $columnName, $columnType, $sampleValue);
+        });
+
+        return true;
+    }
+
+    /**
+     * Create table or add missing columns automatically
+     */
+    public static function ensureTableWithColumns(string $tableName, array $data, array $options = []): bool
+    {
+        // Force auto_add_columns to true for this method
+        $options['auto_add_columns'] = true;
+        
+        if (Schema::hasTable($tableName)) {
+            return self::addMissingColumns($tableName, $data, $options);
+        } else {
+            return self::createTableFromArrayData($tableName, $data, $options);
+        }
+    }
+
+    /**
+     * Insert data with auto column creation
+     */
+    public static function insertDataWithAutoColumns(string $tableName, array $data, array $options = []): void
+    {
+        // Ensure table exists and has all required columns
+        self::ensureTableWithColumns($tableName, $data, $options);
+        
+        // Insert the data
+        self::insertDataIntoTable($tableName, $data, $options);
     }
 }

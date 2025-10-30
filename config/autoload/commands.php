@@ -13,4 +13,5 @@ return [
     App\Command\MqttReceiverCommand::class,
     App\Command\MqttPublishCommand::class,
     App\Command\TestDynamicTableCommand::class,
+    App\Command\TestAutoColumnCommand::class,
 ];

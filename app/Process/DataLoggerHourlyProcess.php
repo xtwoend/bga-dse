@@ -24,8 +24,9 @@ class DataLoggerHourlyProcess extends AbstractProcess
             foreach($groups as $tableName) {
                 $data = Db::table('log_data_buffer')->where('group', $tableName)->get()->pluck('value', 'tag')->toArray();
                 $this->handleLogData($tableName, $data);
+                sleep(1);
             }
-            sleep(3600); // Sleep for one hour
+            sleep(30 * 60); // 30 * 60
         }
     }
 

@@ -36,7 +36,7 @@ class SendCurrentDataProcess extends AbstractProcess
                 $this->send($topic, $data);
             }
             
-            sleep(15); // Sleep for 15 seconds before the next send
+            sleep(30); // Sleep for 15 seconds before the next send
         }
     }
 

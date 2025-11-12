@@ -45,10 +45,10 @@ class DataLoggerSaveProcess extends AbstractProcess
                     }
                 }
                 
-                echo "Processing {$tableName}: " . count($data) . " records found\n";
-                if (!empty($data)) {
-                    var_dump(array_keys($data)); // Show which tags we found
-                }
+                // echo "Processing {$tableName}: " . count($data) . " records found\n";
+                // if (!empty($data)) {
+                //     // var_dump(array_keys($data)); // Show which tags we found
+                // }
                 
                 $this->handleLogData($tableName, $data);
                 sleep(2);

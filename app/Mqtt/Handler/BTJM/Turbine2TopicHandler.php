@@ -27,19 +27,21 @@ class Turbine2TopicHandler implements MqttHandlerInterface
         // var_dump("Received message on topic '{$topic}': {$message}");
         
         [$tag, $value] = $this->topicToTag($topic, $message);
-        $table_name = 'dse_btjm_turbine2';
 
-        // Store data in Redis with key format: log_data_buffer:{group}:{tag}
-        $redis_key = "log_data_buffer:{$table_name}:{$tag}";
-        $data = [
-            'group' => $table_name,
-            'tag' => $tag,
-            'value' => $value,
-            'updated_at' => date('Y-m-d H:i:s')
-        ];
-        
-        // Store as JSON in Redis with TTL (optional - set to 24 hours)
-        $this->redis->setex($redis_key, 86400, json_encode($data));
+        if(!is_null($value)) {
+            $table_name = 'dse_btjm_turbine2';
+            // Store data in Redis with key format: log_data_buffer:{group}:{tag}
+            $redis_key = "log_data_buffer:{$table_name}:{$tag}";
+            $data = [
+                'group' => $table_name,
+                'tag' => $tag,
+                'value' => $value,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
+            // var_dump($data);
+            // Store as JSON in Redis with TTL (optional - set to 24 hours)
+            $this->redis->setex($redis_key, 86400, json_encode($data));
+        }
     }
 
     // Extract value from JSON message

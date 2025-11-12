@@ -107,7 +107,6 @@ class MqttService
             if (isset($topicConfig['handler'])) {
                 $handler = $this->container->get($topicConfig['handler']);
                 $handler->handle($topic, $message);
-                // var_dump($topic, $message);
             } else {
                 $this->logger->warning('No handler configured for topic', ['topic' => $topic]);
             }

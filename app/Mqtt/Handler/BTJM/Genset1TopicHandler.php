@@ -52,7 +52,7 @@ class Genset1TopicHandler implements MqttHandlerInterface
             foreach ($data as $groups) {
                 foreach ($groups as $key => $address) {
                     foreach ($address as $addr => $val) {
-                        return (float) $val ?? 0;
+                        return $val ?? null;
                     }
                 }
             }

@@ -26,7 +26,7 @@ class DataLoggerHourlyProcess extends AbstractProcess
                 $this->handleLogData($tableName, $data);
                 sleep(1);
             }
-            sleep(30 * 60); // 30 * 60
+            sleep(30 * 60); // 30 * 60 seconds = 30 minutes
         }
     }
 

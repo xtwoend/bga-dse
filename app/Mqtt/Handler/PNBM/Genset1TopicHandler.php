@@ -38,8 +38,8 @@ class Genset1TopicHandler implements MqttHandlerInterface
             'updated_at' => date('Y-m-d H:i:s')
         ];
         
-        // Store as JSON in Redis with TTL (optional - set to 24 hours)
-        $this->redis->setex($redis_key, 86400, json_encode($data));
+        // Store as JSON in Redis with TTL (optional - set to 3600 seconds)
+        $this->redis->setex($redis_key, 3600, json_encode($data));
     }
 
     // Extract value from JSON message

@@ -39,7 +39,7 @@ class DataLoggerSaveProcess extends AbstractProcess
                         if (!empty($values[$index])) {
                             $jsonData = json_decode($values[$index], true);
                             if ($jsonData && isset($jsonData['tag'], $jsonData['value'])) {
-                                $data[$jsonData['tag']] = $jsonData;
+                                $data[$jsonData['tag']] = ($jsonData['updated_at'] < date('Y-m-d H:i:s', strtotime('-120 seconds'))) ? null : $jsonData;
                             }
                         }
                     }
@@ -90,7 +90,7 @@ class DataLoggerSaveProcess extends AbstractProcess
                 'group' => $tableName,
                 'tag' => $key
             ], [
-                'value' => (float) $val
+                'value' => is_null($val) ? null : (float) $val
             ]);
         }
     }

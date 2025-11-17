@@ -51,11 +51,11 @@ class MqttService
             $connectionSettings = $this->getConnectionSettings($config);
             $client->connect($connectionSettings, true);
             
-            $this->logger->info('Connected to MQTT broker', [
-                'host' => $config['host'],
-                'port' => $config['port'],
-                'client_id' => $config['client_id'],
-            ]);
+            // $this->logger->info('Connected to MQTT broker', [
+            //     'host' => $config['host'],
+            //     'port' => $config['port'],
+            //     'client_id' => $config['client_id'],
+            // ]);
 
             // Subscribe to configured topics
             foreach ($config['topics'] as $topic => $topicConfig) {
@@ -64,10 +64,10 @@ class MqttService
                     $this->handleMessage($topic, $message, $topicConfig);
                 }, $topicConfig['qos'] ?? 0);
 
-                $this->logger->info('Subscribed to topic', [
-                    'topic' => $topic,
-                    'qos' => $topicConfig['qos'] ?? 0,
-                ]);
+                // $this->logger->info('Subscribed to topic', [
+                //     'topic' => $topic,
+                //     'qos' => $topicConfig['qos'] ?? 0,
+                // ]);
             }
 
             // Keep the connection alive and listen for messages

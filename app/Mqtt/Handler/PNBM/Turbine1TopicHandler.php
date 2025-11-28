@@ -40,6 +40,7 @@ class Turbine1TopicHandler implements MqttHandlerInterface
         
         // Store as JSON in Redis with TTL (optional - set to 3600 seconds)
         $this->redis->setex($redis_key, 3600, json_encode($data));
+        // 3600
     }
 
     // Extract value from JSON message
